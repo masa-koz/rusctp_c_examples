@@ -1,0 +1,6 @@
+[submodule "dep/rusctp"]
+	path = dep/rusctp
+	url = https://github.com/masa-koz/rusctp.git
+[submodule "dep/cmake-cargo"]
+	path = dep/cmake-cargo
+	url = git@github.com:AndrewGaspar/cmake-cargo.git
