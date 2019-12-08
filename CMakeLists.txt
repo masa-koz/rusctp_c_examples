@@ -12,3 +12,6 @@ include_directories("${CMAKE_SOURCE_DIR}/dep/rusctp/include")
 
 add_executable(client client.c)
 target_link_libraries(client PUBLIC rusctp)
+
+add_executable(server server.c)
+target_link_libraries(server PUBLIC ws2_32 rusctp)

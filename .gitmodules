@@ -3,5 +3,5 @@
 	url = https://github.com/AndrewGaspar/cmake-cargo.git
 [submodule "dep/rusctp"]
 	path = dep/rusctp
-	url = https://github.com/masa-koz/rusctp.git
+	url = git@github.com:masa-koz/rusctp.git
 	branch = kozuka_add_ffi
