@@ -37,10 +37,11 @@ void dump_pkt(uint8_t *buf, size_t len)
 int main()
 {
     SOCKET s;
-    struct sockaddr_in server, from_sin;
+    struct sockaddr_in server, raddr_sin, laddr_sin;
     int slen, recv_len;
     char rbuf[BUFLEN], sbuf[BUFLEN], secret[32];
     WSADATA wsa;
+    rusctp_init_config *config = NULL;
 
     rusctp_enable_logging(log, NULL, RUSCTP_LOGLEVEL_TRACE);
 
@@ -49,6 +50,20 @@ int main()
         printf("WSAStartup: %d\n", WSAGetLastError());
         exit(EXIT_FAILURE);
     }
+
+    config = rusctp_config_new(10001);
+    if (config == NULL)
+    {
+        printf("rusctp_config_new\n");
+        exit(EXIT_FAILURE);
+    }
+    rusctp_config_set_secret_key(config, secret, sizeof(secret));
+
+    memset(&laddr_sin, 0, sizeof(laddr_sin));
+    laddr_sin.sin_family = AF_INET;
+    laddr_sin.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    rusctp_config_add_laddr(config, (struct sockaddr *)&laddr_sin, sizeof(laddr_sin));
 
     if ((s = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
     {
@@ -77,14 +92,14 @@ int main()
         int rc = 0;
         rusctp_assoc *assoc = NULL;
 
-        slen = sizeof(from_sin);
-        if ((recv_len = recvfrom(s, rbuf, rbuf_len, 0, (struct sockaddr *)&from_sin, &slen)) == SOCKET_ERROR)
+        slen = sizeof(raddr_sin);
+        if ((recv_len = recvfrom(s, rbuf, rbuf_len, 0, (struct sockaddr *)&raddr_sin, &slen)) == SOCKET_ERROR)
         {
             printf("recvfrom: %d\n", WSAGetLastError());
             continue;
         }
 
-        printf("Received packet from %s:%d\n", inet_ntoa(from_sin.sin_addr), ntohs(from_sin.sin_port));
+        printf("Received packet from %s:%d\n", inet_ntoa(raddr_sin.sin_addr), ntohs(raddr_sin.sin_port));
         dump_pkt(rbuf, recv_len);
         rc = rusctp_header_info(rbuf, recv_len, &src_port, &dst_port, &vtag);
         if (rc < 0)
@@ -93,14 +108,14 @@ int main()
         }
 
         rbuf_len = recv_len;
-        assoc = rusctp_accept((struct sockaddr *)&from_sin, slen, rbuf, &rbuf_len, sbuf, &sbuf_len, secret, sizeof(secret));
+        assoc = rusctp_accept((struct sockaddr *)&raddr_sin, slen, rbuf, &rbuf_len, sbuf, &sbuf_len, config);
         if (assoc == NULL)
         {
             rbuf_off += rbuf_len;
             if (sbuf_len > 0)
             {
                 dump_pkt(sbuf, sbuf_len);
-                if (sendto(s, sbuf, sbuf_len, 0, (struct sockaddr *)&from_sin, slen) == SOCKET_ERROR)
+                if (sendto(s, sbuf, sbuf_len, 0, (struct sockaddr *)&raddr_sin, slen) == SOCKET_ERROR)
                 {
                     printf("sendto() failed with error code: %d", WSAGetLastError());
                     exit(EXIT_FAILURE);
