@@ -5,3 +5,6 @@
 	path = dep/rusctp
 	url = git@github.com:masa-koz/rusctp.git
 	branch = kozuka_add_ffi
+[submodule "dep/libev"]
+	path = dep/libev
+	url = git@github.com:masa-koz/libev.git

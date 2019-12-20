@@ -8,6 +8,8 @@ include(Cargo)
 
 add_crate(dep/rusctp/Cargo.toml)
 
+add_subdirectory(dep/libev)
+
 include_directories("${CMAKE_SOURCE_DIR}/dep/rusctp/include")
 
 add_executable(client client.c)
