@@ -8,3 +8,6 @@
 [submodule "dep/libev"]
 	path = dep/libev
 	url = git@github.com:masa-koz/libev.git
+[submodule "dep/libuv"]
+	path = dep/libuv
+	url = git@github.com:masa-koz/libuv.git
